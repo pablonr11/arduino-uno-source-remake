@@ -7,7 +7,7 @@ typedef enum
 {
     LOW,
     HIGH,
-} digital_values;
+} digital_value;
 
 typedef enum
 {
@@ -18,6 +18,8 @@ typedef enum
 
 void pinMode(uint8_t pin, digital_mode mode);
 
-void digitalWrite(uint8_t pin, digital_values value);
+void digitalWrite(uint8_t pin, digital_value value);
+
+digital_value digitalRead(uint8_t pin);
 
 #endif

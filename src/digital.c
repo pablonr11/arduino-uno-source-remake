@@ -26,7 +26,7 @@ void pinMode(uint8_t pin, digital_mode mode)
     }
 }
 
-void digitalWrite(uint8_t pin, digital_values value)
+void digitalWrite(uint8_t pin, digital_value value)
 {
     uint8_t pinPort = pinToPortConversor[pin];
     uint8_t pinBit = pinToBitConversor[pin];
@@ -42,4 +42,24 @@ void digitalWrite(uint8_t pin, digital_values value)
         *pinOutputRegister |= pinBit;
         break;
     }
+}
+
+digital_value digitalRead(uint8_t pin)
+{
+    uint8_t pinPort = pinToPortConversor[pin];
+    uint8_t pinBit = pinToBitConversor[pin];
+
+    volatile uint8_t *pinInputRegister = portToInputConversor[pinPort];
+
+    // Datasheet specifies a nop instruction is needed before reading
+    // a value to properly sync, but I think this isn't needed here
+    // since we are already doing a bunch of other operations before
+    // actually reading the bit value
+    // NO_OPERATION()
+    if (*pinInputRegister & pinBit)
+    {
+        return HIGH;
+    }
+
+    return LOW;
 }
