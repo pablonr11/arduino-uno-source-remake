@@ -1,5 +1,4 @@
-*.hex
-*.out
-*.o
+.vscode/
+build/
 
-notes
+notes.txt
