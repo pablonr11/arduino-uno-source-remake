@@ -9,14 +9,14 @@ int main()
 
     while (1)
     {
-        PORTB |= (1 << 5);
-        for (long i = 0; i < 100000; i++)
+        digitalWrite(LED_BUILTIN, HIGH);
+        for (long i = 0; i < 1000000; i++)
         {
             __asm__("nop");
         }
 
-        PORTB &= ~(1 << 5);
-        for (long i = 0; i < 100000; i++)
+        digitalWrite(LED_BUILTIN, LOW);
+        for (long i = 0; i < 1000000; i++)
         {
             __asm__("nop");
         }

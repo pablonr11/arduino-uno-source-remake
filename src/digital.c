@@ -25,3 +25,21 @@ void pinMode(uint8_t pin, digital_mode mode)
         break;
     }
 }
+
+void digitalWrite(uint8_t pin, digital_values value)
+{
+    uint8_t pinPort = pinToPortConversor[pin];
+    uint8_t pinBit = pinToBitConversor[pin];
+
+    volatile uint8_t *pinOutputRegister = portToOutputConversor[pinPort];
+
+    switch (value)
+    {
+    case LOW:
+        *pinOutputRegister &= ~pinBit;
+        break;
+    case HIGH:
+        *pinOutputRegister |= pinBit;
+        break;
+    }
+}

@@ -3,8 +3,11 @@
 
 #include <stdint.h>
 
-#define LOW 0
-#define HIGH 1
+typedef enum
+{
+    LOW,
+    HIGH,
+} digital_values;
 
 typedef enum
 {
@@ -14,5 +17,7 @@ typedef enum
 } digital_mode;
 
 void pinMode(uint8_t pin, digital_mode mode);
+
+void digitalWrite(uint8_t pin, digital_values value);
 
 #endif
