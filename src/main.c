@@ -5,7 +5,7 @@
 
 int main()
 {
-    pinMode(13, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
 
     while (1)
     {

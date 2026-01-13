@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define LED_BUILTIN 13
+
 #define PB 0
 #define PC 1
 #define PD 2
