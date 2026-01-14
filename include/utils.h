@@ -10,4 +10,7 @@
 // Inserts one "nop" instruction
 #define NO_OPERATION() __asm__("nop")
 
+// Void function pointer type
+typedef void (*voidFunctionP)(void);
+
 #endif
