@@ -10,14 +10,17 @@
 #define F_CPU 16000000
 #endif
 
+// Pin output registers
 #define PORTB REG8(0x25)
 #define PORTC REG8(0X28)
 #define PORTD REG8(0x2B)
 
+// Pin Data direction registers
 #define DDRB REG8(0x24)
 #define DDRC REG8(0x27)
 #define DDRD REG8(0x2A)
 
+// Pin input registers
 #define PINB REG8(0x23)
 #define PINC REG8(0x26)
 #define PIND REG8(0x29)

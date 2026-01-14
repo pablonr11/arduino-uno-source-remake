@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 
+// Used to convert a pin number to its corresponding bit
 const uint8_t pinToBitConversor[] = {
     // Port D
     LSHB(0),
@@ -30,6 +31,7 @@ const uint8_t pinToBitConversor[] = {
     LSHB(5),
 };
 
+// Used to get the port of a pin
 const uint8_t pinToPortConversor[] = {
     // Port D
     PD,
@@ -56,17 +58,20 @@ const uint8_t pinToPortConversor[] = {
     PC,
 };
 
+// Converts a port to its corresponding data direction register
 volatile uint8_t *const portToModeConversor[] = {
     &DDRB,
     &DDRC,
     &DDRD};
 
+// Converts a port to its corresponding output register
 volatile uint8_t *const portToOutputConversor[] = {
     &PORTB,
     &PORTC,
     &PORTD,
 };
 
+// Converts a port to its corresponding input register
 volatile uint8_t *const portToInputConversor[] = {
     &PINB,
     &PINC,

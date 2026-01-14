@@ -5,6 +5,7 @@
 
 #define LED_BUILTIN 13
 
+// Port indexes
 #define PB 0
 #define PC 1
 #define PD 2

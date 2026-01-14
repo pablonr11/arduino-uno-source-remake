@@ -3,8 +3,11 @@
 
 #include <stdint.h>
 
+// Access an 8 bit address
 #define REG8(addr) (*(volatile uint8_t *)(addr))
-#define LSHB(bit) (1 << bit) // Left Shift 1 bit
+// Left Shift 1 bit
+#define LSHB(bit) (1 << bit)
+// Inserts one "nop" instruction
 #define NO_OPERATION() __asm__("nop")
 
 #endif
