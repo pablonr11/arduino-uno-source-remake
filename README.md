@@ -5,4 +5,19 @@ This project is not intended to replace the original Arduino code, but rather to
 
 The ATMega328P is the target microprocessor for this project. It's the microprocessor used in the Arduino Uno R3, which makes it fairly easy to start learning since there's plenty of information available online.
 
+## Roadmap
+
+This is a list of features I would like to implement.
+
+> [!NOTE]
+> I'll probably add more features to the list, but for now I've included the basics.
+
+* [X] pinMode / digitalRead / digitalWrite
+* [X] Interrupts (attachInterrupt and detachInterrupt)
+* [ ] Timing functions (delay, delayMicroseconds...)
+* [ ] UART (Serial)
+* [ ] ADC
+* [ ] PWM
+* [ ] I2C / SPI (Wire?)
+
 *This readme and the project will be updated in a future*
