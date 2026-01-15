@@ -48,6 +48,26 @@ void attachInterrupt(int8_t interrupt, voidFunctionP function, external_interrup
     }
 }
 
+void detachInterrupt(int8_t interrupt)
+{
+    if (interrupt == INVALID_PIN_INTERRUPT || interrupt > EXTERNAL_INTERRUPTS_NUMBER)
+    {
+        return;
+    }
+
+    interrupts[interrupt] = emptyISR;
+
+    switch (interrupt)
+    {
+    case 0:
+        EIMSK &= ~(1 << INT0);
+        break;
+    case 1:
+        EIMSK &= ~(1 << INT1);
+        break;
+    }
+}
+
 ISR(INT0_vect)
 {
     interrupts[0]();

@@ -83,4 +83,11 @@ int8_t digitalPinToInterrupt(uint8_t pin);
  */
 void attachInterrupt(int8_t interrupt, voidFunctionP function, external_interrupt_mode mode);
 
+/**
+ * @brief Use this function to turn off an interrupt.
+ * @param interrupt Interrupt index to configure.
+ * Use digitalPinToInterrupt to convert the pin to its corresponding index
+ */
+void detachInterrupt(int8_t interrupt);
+
 #endif

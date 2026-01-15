@@ -6,6 +6,12 @@
 #include "digital.h"
 #include "interrupt.h"
 
+// This example is the same as the attachInterrupt example
+// When the button is pressed 3 times the interrupt is detached
+// by calling detachInterrupt. Once the interrupt is detached
+// the program enters an infinite loop sice there is nothing
+// else to do.
+
 #define BUTTON_PIN 2
 
 static volatile bool blink = false;
