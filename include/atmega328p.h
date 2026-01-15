@@ -83,4 +83,40 @@
 #define PCINT6 6
 #define PCINT7 7
 
+// --- Timer/Counter Registers ---
+#define TCCR0A REG8(0x44) // Timer/Counter Control Register A
+#define WGM00 0
+#define WGM01 1
+#define COM0B0 4
+#define COM0B1 5
+#define COM0A0 6
+#define COM0A1 7
+
+#define TCCR0B REG8(0x45) // Timer/Counter Control Register B
+#define CS00 0
+#define CS01 1
+#define CS02 2
+#define WGM02 3
+#define FOC0B 6
+#define FOC0A 7
+
+#define TCNT0 REG8(0X46) // Timer/Counter0 Value
+#define OCR0A REG8(0x47) // Output Compare Register A. Stores compare value A for timer/counter0
+#define OCR0B REG8(0x48) // Output Compare Register B. Stores compare value B for timer/counter0
+
+#define TIMSK0 REG8(0x6E) // Timer/Counter Interrupt Mask Register. Enable/Disable timer/counter0 interrupts
+#define TOIE0 0
+#define OCIE0A 1
+#define OCIE0B 2
+
+#define TIFR0 REG8(0X35) // Timer/Counter0 Interrupt Flag Register.
+#define TOV0 0
+#define OCF0A 1
+#define OCF0B 2
+
+#define TIMER_PRESCALER_8 0b010
+#define TIMER_PRESCALER_64 0b011
+#define TIMER_PRESCALER_256 0b100
+#define TIMER_PRESCALER_1024 0b101
+
 #endif

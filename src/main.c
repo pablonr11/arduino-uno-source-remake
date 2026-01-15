@@ -5,6 +5,7 @@
 #include "atmega328p.h"
 #include "digital.h"
 #include "interrupt.h"
+#include "timing.h"
 
 #define BUTTON_PIN 2
 
@@ -39,6 +40,8 @@ static void blinkLed()
 
 int main()
 {
+    initTiming();
+
     bool detachedInterrupt = false;
 
     pinMode(LED_BUILTIN, OUTPUT);
