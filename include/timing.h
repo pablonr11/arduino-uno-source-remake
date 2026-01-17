@@ -14,6 +14,9 @@
 // 64 * 256 gives the amount of cycles per timer0 overclock. (16384)
 // So (64 * 256) / CLOCK_CYCLES_PER_MICROSECOND = 1024 microseconds per timer0 overclock
 #define MICROSECONDS_PER_TIMER0_OVERFLOW (TIMER0_PRESCALER * 256 / CLOCK_CYCLES_PER_MICROSECOND)
+#define MILLISECONDS_PER_TIMER0_OVERFLOW (MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
+#define MICROSECONDS_PER_MILLISECOND 1000
+#define MILLISECONDS_FRACTION_INCREMENT (MICROSECONDS_PER_TIMER0_OVERFLOW - MICROSECONDS_PER_MILLISECOND)
 
 /**
  * @brief This function should be called at the start of the program
@@ -33,5 +36,11 @@ uint32_t micros(void);
  * For delays higher than 16383 microseconds use delay()
  */
 void delayMicroseconds(uint16_t microseconds);
+
+/**
+ * @brief Calculates the amount of milliseconds since timer/counter0 was enabled
+ * @return The amount of milliseconds since timer/counter0 was enabled
+ */
+uint32_t millis(void);
 
 #endif

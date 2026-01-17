@@ -6,9 +6,32 @@
 #include <stdint.h>
 
 static volatile uint32_t timer0Overflows = 0;
+static volatile uint32_t timer0Millis = 0;
+static volatile uint16_t timer0LostMillisFraction = 0;
 
 ISR(TIMER0_OVF_vect)
 {
+    uint32_t milliseconds = timer0Millis;
+    uint16_t millisFract = timer0LostMillisFraction;
+
+    // Here we increment milliseconds by 1 everytime.
+    // Technically it should be 1.024 but the value gets
+    // truncated to 1 because we are storing an integer.
+    milliseconds += MILLISECONDS_PER_TIMER0_OVERFLOW;
+    // We can account for the lost part storing the fractional part
+    // and adding an extra millisecond once we stored enough
+    // Store 24 lost microseconds
+    millisFract += MILLISECONDS_FRACTION_INCREMENT;
+
+    // Once we stored more than 1000 microseconds add them to the milliseconds
+    if (millisFract >= MICROSECONDS_PER_MILLISECOND)
+    {
+        millisFract -= MICROSECONDS_PER_MILLISECOND;
+        milliseconds += 1;
+    }
+
+    timer0Millis = milliseconds;
+    timer0LostMillisFraction = millisFract;
     timer0Overflows++;
 }
 
@@ -62,6 +85,7 @@ uint32_t micros(void)
 
     return (numberOfOverflows * MICROSECONDS_PER_TIMER0_OVERFLOW + timerValue * TIMER0_TICK_MICROSECONDS);
 }
+
 void delayMicroseconds(uint16_t microseconds)
 {
     // This function assumes -Os optimization
@@ -130,4 +154,23 @@ void delayMicroseconds(uint16_t microseconds)
     // Probably this is the closest we can get without using another timer/counter
     // from the mcu.
     // More comments than code lmao
+}
+
+uint32_t millis(void)
+{
+    uint32_t milliseconds;
+    uint8_t auxSREG = SREG; // Store status register
+
+    // Here we need to disable interrupts before reading timer0Millis
+    // because it is 32 bits.
+    // If we don't disable interrupts, an overflow interrupt can happen
+    // between the instruction that load the value
+    // causing that we read an incorrect value.
+    CLI();
+    milliseconds = timer0Millis;
+
+    // Restore SREG. (This should enable interrupts if they weren't disabled before)
+    SREG = auxSREG;
+
+    return milliseconds;
 }
