@@ -30,7 +30,7 @@ uint32_t micros(void);
 /**
  * @brief Delays for the given amount of microseconds
  * @param microseconds The amount of microseconds to delay.
- * For delays higher than 65535 use delay()
+ * For delays higher than 16383 microseconds use delay()
  */
 void delayMicroseconds(uint16_t microseconds);
 
