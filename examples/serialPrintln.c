@@ -1,6 +1,10 @@
 #include "timing.h"
 #include "serial.h"
 
+// This example uses serialPrintln to print
+// the text "Hello from Arduino UNO :)" every 1 second
+// to the serial.
+
 int main()
 {
     initTiming();

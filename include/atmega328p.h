@@ -130,4 +130,39 @@
 #define TIMER_PRESCALER_256 0b100
 #define TIMER_PRESCALER_1024 0b101
 
+//--- Serial registers ---
+#define UDR0 REG8(0xC6)   // USART I/O Data Register.
+#define UCSR0A REG8(0xC0) // USART Control and Status Register A
+#define MPCM0 0
+#define U2X0 1
+#define UPE0 2
+#define DOR0 3
+#define FE0 4
+#define UDRE0 5
+#define TXC0 6
+#define RXC0 7
+
+#define UCSR0B REG8(0xC1) // USART Control and Status Register B
+#define TXB80 0
+#define RXB80 1
+#define UCSZ02 2
+#define TXEN0 3
+#define RXEN0 4
+#define UDRIE0 5
+#define TXCIE0 6
+#define RXCIE0 7
+
+#define UCSR0C REG8(0xC2) // USART Control and Status Register C
+#define UCPOL0 0
+#define UCSZ00 1
+#define UCSZ01 2
+#define USBS0 3
+#define UPM00 4
+#define UPM01 5
+#define UMSEL00 6
+#define UMSEL01 7
+
+#define UBRR0H REG8(0xC5) // USART Baud Rate Register (MSB)
+#define UBRR0L REG8(0xC4) // USART Baud Rate Register (LSB)
+
 #endif
