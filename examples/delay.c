@@ -4,6 +4,9 @@
 #include "digital.h"
 #include "timing.h"
 
+// This example uses the delay function to blink
+// the built-in led in the Arduino UNO every second
+
 int main()
 {
     initTiming();

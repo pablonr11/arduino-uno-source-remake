@@ -43,4 +43,10 @@ void delayMicroseconds(uint16_t microseconds);
  */
 uint32_t millis(void);
 
+/**
+ * @brief Delays for the given amount of milliseconds
+ * @param milliseconds The amount of milliseconds to delay
+ */
+void delay(uint32_t milliseconds);
+
 #endif

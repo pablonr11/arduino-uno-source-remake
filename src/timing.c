@@ -174,3 +174,44 @@ uint32_t millis(void)
 
     return milliseconds;
 }
+
+// This was my first implementation.
+// The division made the compiler add 3 additional functions to the program.
+// This made the program size increase by 64 bytes. Technically it doesn't matter
+// because any other division that is not a multiple of 2 in the program should
+// add this functions again.
+// But for now I simplified the delay function to use millis instead of micros.
+// void delay(uint32_t milliseconds)
+// {
+//     uint32_t start = micros();
+
+//     while(((micros() - start) / 1000) < milliseconds)
+//     {
+//         // do nothing
+//     }
+// }
+
+// This is the original Arduino implementation which increases the size
+// a bit more than my implementation, but probably is more precise.
+// I don't really know the reason to do it this way.
+// void delay(unsigned long ms)
+// {
+//     uint32_t start = micros();
+
+//     while (ms > 0)
+//     {
+//         while (ms > 0 && (micros() - start) >= 1000)
+//         {
+//             ms--;
+//             start += 1000;
+//         }
+//     }
+// }
+
+void delay(uint32_t milliseconds)
+{
+    uint32_t start = millis();
+
+    while ((millis() - start) < milliseconds)
+        ;
+}
