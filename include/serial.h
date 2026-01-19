@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define RX_BUFFER_SIZE 64
+
 /**
  * ATMega328P uses the pins RXD and TXD (PD0 and PD1 aka. D0 and D1
  * in the Arduino UNO R3) as the receive and transmit pins for USART.
@@ -36,5 +38,17 @@ void serialPrint(const char *str);
  * Should contain a null terminator.
  */
 void serialPrintln(const char *str);
+
+/**
+ * @brief Checks if there are available bytes to read in the rx buffer.
+ * @return The amount of bytes to read from the rx buffer
+ */
+uint8_t serialAvailable(void);
+
+/**
+ * @brief Gets the last unread character in the rx buffer.
+ * @return The obtained byte from the RX buffer.
+ */
+int serialRead(void);
 
 #endif

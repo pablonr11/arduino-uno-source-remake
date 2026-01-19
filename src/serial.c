@@ -4,6 +4,25 @@
 
 #include <stdint.h>
 
+// RX ring buffer. Stores the received bytes through serial.
+static volatile char rxBuffer[RX_BUFFER_SIZE] = {0};
+static volatile uint8_t rxHead = 0; // Last write position
+static volatile uint8_t rxTail = 0; // Last read position
+
+ISR(USART_RX_vect)
+{
+    uint8_t next = (rxHead + 1) % RX_BUFFER_SIZE;
+    uint8_t data = UDR0;
+
+    // If we are gonna write where the tail is this means
+    // we are overwritting data, so we just ignore the received byte
+    if (next != rxTail)
+    {
+        rxBuffer[rxHead] = data;
+        rxHead = next;
+    }
+}
+
 void serialBegin(uint32_t baudrate)
 {
     // Calculate the baud rate register value first
@@ -30,7 +49,7 @@ void serialBegin(uint32_t baudrate)
 
     // Once the configuration is done we can enable receiver, transmitter and
     // rx complete interrupt
-    UCSR0B |= LSHB(RXEN0) | LSHB(TXEN0);
+    UCSR0B |= LSHB(RXEN0) | LSHB(TXEN0) | LSHB(RXCIE0);
 }
 
 static void serialWrite(const char chr)
@@ -56,4 +75,20 @@ void serialPrintln(const char *str)
 {
     serialPrint(str);
     serialPrint("\r\n");
+}
+
+uint8_t serialAvailable(void)
+{
+    return (uint8_t)(RX_BUFFER_SIZE + rxHead - rxTail) % RX_BUFFER_SIZE;
+}
+
+int serialRead(void)
+{
+    if (rxHead == rxTail)
+        return -1;
+
+    char data = rxBuffer[rxTail];
+    rxTail = (rxTail + 1) % RX_BUFFER_SIZE;
+
+    return data;
 }

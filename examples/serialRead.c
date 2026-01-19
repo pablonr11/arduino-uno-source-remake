@@ -5,6 +5,22 @@
 
 #include <string.h>
 
+/**
+ * In this example we use the serialRead and the serialAvailable
+ * function to receive data from the Arduino UNO Serial.
+ * If we connect the Arduino UNO through USB to a computer and
+ * connect to it through serial we can send some commands.
+ * The available commands are:
+ * - ON: Turns on the built in led
+ * - OFF: Turns off the built in led
+ * - TOGGLE: Toggles the built in led
+ * If we send something that is not recognized as a valid command
+ * we print ""Unkown command: cmd" to the serial.
+ * If the command exceds CMD_MAX_SIZE we print "Command too long"
+ * and proceed to discard all the bytes until the EOL to properly
+ * clean the rx buffer.
+ */
+
 #define CMD_MAX_SIZE 64
 
 int main()
