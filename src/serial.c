@@ -9,6 +9,13 @@ static volatile char rxBuffer[RX_BUFFER_SIZE] = {0};
 static volatile uint8_t rxHead = 0; // Last write position
 static volatile uint8_t rxTail = 0; // Last read position
 
+// TX ring buffer. Stores the bytes to send through serial.
+// Using a software buffer for tx and using Data Register Empty
+// Interrupt we can make transmitions of large data less blocking.
+static volatile char txBuffer[TX_BUFFER_SIZE] = {0};
+static volatile uint8_t txHead = 0;
+static volatile uint8_t txTail = 0;
+
 ISR(USART_RX_vect)
 {
     uint8_t next = (rxHead + 1) % RX_BUFFER_SIZE;
@@ -21,6 +28,18 @@ ISR(USART_RX_vect)
         rxBuffer[rxHead] = data;
         rxHead = next;
     }
+}
+
+ISR(USART_UDRE_vect)
+{
+    if (txTail == txHead)
+    {
+        UCSR0B &= ~LSHB(UDRIE0); // Disable interrupt
+        return;
+    }
+
+    UDR0 = txBuffer[txTail];
+    txTail = (txTail + 1) % TX_BUFFER_SIZE;
 }
 
 void serialBegin(uint32_t baudrate)
@@ -50,15 +69,28 @@ void serialBegin(uint32_t baudrate)
     // Once the configuration is done we can enable receiver, transmitter and
     // rx complete interrupt
     UCSR0B |= LSHB(RXEN0) | LSHB(TXEN0) | LSHB(RXCIE0);
+    // Technically this shouldn't be necessary but we ensure
+    // Data Empty Registry Interrupt is disabled.
+    // We need to be carefull with this interrupt because
+    // enabling it will generate interrupts while the
+    // data register is empty.
+    UCSR0B &= ~LSHB(UDRIE0);
 }
 
 static void serialWrite(const char chr)
 {
-    // Wait until the transmit buffer is ready to receive new data
-    while (!(UCSR0A & LSHB(UDRE0)))
+    uint8_t next = (txHead + 1) % TX_BUFFER_SIZE;
+
+    // Only block if tx buffer is full. In this case we need
+    // to wait until the UDRE interrupt sends some data
+    while (next == txTail)
         ;
 
-    UDR0 = chr; // Write the character to be sent.
+    txBuffer[txHead] = chr;
+    txHead = next;
+
+    // Enable UDRE interrupt
+    UCSR0B |= LSHB(UDRIE0);
 }
 
 void serialPrint(const char *str)

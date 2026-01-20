@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define RX_BUFFER_SIZE 64
+#define TX_BUFFER_SIZE 64
 
 /**
  * ATMega328P uses the pins RXD and TXD (PD0 and PD1 aka. D0 and D1
