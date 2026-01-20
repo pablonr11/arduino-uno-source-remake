@@ -39,6 +39,9 @@ ISR(USART_UDRE_vect)
     }
 
     UDR0 = txBuffer[txTail];
+    // Clear TXC0 manually.
+    // "can be cleared by writing a one to its bit location"
+    UCSR0A |= LSHB(TXC0);
     txTail = (txTail + 1) % TX_BUFFER_SIZE;
 }
 
@@ -127,8 +130,24 @@ int serialRead(void)
 
 void serialEnd(void)
 {
+    // Ensure we sent everything before disabling the serial
+    serialFlush();
+
     UCSR0B &= ~(LSHB(RXEN0) | LSHB(TXEN0) | LSHB(RXCIE0));
 
     rxHead = 0;
     rxTail = 0;
+}
+
+void serialFlush(void)
+{
+    // If txHead == txTail means there's nothing else to send from the buffer
+    while (txHead != txTail)
+        ;
+
+    // Wait until the transmit bit complete bit is 1
+    while (!(UCSR0A & LSHB(TXC0)))
+        ;
+
+    // Once we reach here everything has been sent
 }

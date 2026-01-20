@@ -58,4 +58,9 @@ int serialRead(void);
  */
 void serialEnd(void);
 
+/**
+ * @brief Waits until the previous transmition is completed.
+ */
+void serialFlush(void);
+
 #endif
