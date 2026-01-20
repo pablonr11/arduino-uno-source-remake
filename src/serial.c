@@ -92,3 +92,11 @@ int serialRead(void)
 
     return data;
 }
+
+void serialEnd(void)
+{
+    UCSR0B &= ~(LSHB(RXEN0) | LSHB(TXEN0) | LSHB(RXCIE0));
+
+    rxHead = 0;
+    rxTail = 0;
+}

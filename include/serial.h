@@ -51,4 +51,10 @@ uint8_t serialAvailable(void);
  */
 int serialRead(void);
 
+/**
+ * @brief Closes the serial communication. Doing so allows the RX and TX
+ * pins to be used as GPIOs.
+ */
+void serialEnd(void);
+
 #endif
