@@ -15,7 +15,7 @@ This is a list of features I would like to implement.
 * [X] pinMode / digitalRead / digitalWrite
 * [X] Interrupts (attachInterrupt and detachInterrupt)
 * [X] Timing functions (delay, delayMicroseconds...)
-* [ ] UART (Serial)
+* [X] UART (Serial)
 * [ ] ADC
 * [ ] PWM
 * [ ] I2C / SPI (Wire?)
