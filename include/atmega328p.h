@@ -165,4 +165,48 @@
 #define UBRR0H REG8(0xC5) // USART Baud Rate Register (MSB)
 #define UBRR0L REG8(0xC4) // USART Baud Rate Register (LSB)
 
+// --- ADC Registers ---
+#define ADMUX REG8(0x7C) // ADC Multiplexer Selection Register
+#define MUX0 0
+#define MUX1 1
+#define MUX2 2
+#define MUX3 3
+#define ADLAR 5
+#define REFS0 6
+#define REFS1 7
+
+#define ADCSRA REG8(0x7A) // ADC Control and Status Register A
+#define ADPS0 0
+#define ADPS1 1
+#define ADPS2 2 // Preescaler select bits
+#define ADIE 3
+#define ADIF 4
+#define ADATE 5
+#define ADSC 6 // Set to 1 to start a conversion
+#define ADEN 7 // ADC Enable. Write to 1 at initialization
+
+// NOTE 1: The first conversion after setting ADSC on ADEN (or both at the same time)
+// takes longer (25 cycles) than usual (13 cycles)
+
+// NOTE 2: Since we are going to use the 10 bits in the data register
+// we need to set out preescaler to 128 (all ADPS bits to 1) if we are
+// running at 16MHz.
+
+#define ADCSRB REG8(0x7B) // ADC Control and Status Register B
+#define ADTS0 0
+#define ADTS1 1
+#define ADTS2 2
+#define ACME 6 // This bit appears in the datasheet but is not specified what it does.
+
+#define DIDR0 REG8(0x7E) // Digital Input Disable Register 0
+#define ADC0D 0
+#define ADC1D 1
+#define ADC2D 2
+#define ADC3D 3
+#define ADC4D 4
+#define ADC5D 5
+
+#define ADCL REG8(0x78) // Lower ADC Data Register
+#define ADCH REG8(0x79) // Higher ADC Data Register
+
 #endif

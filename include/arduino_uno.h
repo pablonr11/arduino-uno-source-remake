@@ -5,6 +5,23 @@
 
 #define LED_BUILTIN 13
 
+typedef enum
+{
+    // Arduino UNO R3 analog inputs
+    ADC_PIN0 = 0,
+    ADC_PIN1,
+    ADC_PIN2,
+    ADC_PIN3,
+    ADC_PIN4,
+    ADC_PIN5,
+    // Additional ATMega328P analog inputs
+    ADC_PIN6,
+    ADC_PIN7,
+    ADC_TEMPERATURE,
+    ADC_1V1 = 0b1110, // 14
+    ADC_GND,
+} analog_pin;
+
 // Port indexes
 #define PB 0
 #define PC 1
