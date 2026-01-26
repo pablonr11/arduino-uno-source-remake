@@ -94,8 +94,8 @@
 #define PCINT6 6
 #define PCINT7 7
 
-// --- Timer/Counter Registers ---
-#define TCCR0A REG8(0x44) // Timer/Counter Control Register A
+// --- Timer/Counter0 Registers ---
+#define TCCR0A REG8(0x44) // Timer/Counter0 Control Register A
 #define WGM00 0
 #define WGM01 1
 #define COM0B0 4
@@ -103,7 +103,7 @@
 #define COM0A0 6
 #define COM0A1 7
 
-#define TCCR0B REG8(0x45) // Timer/Counter Control Register B
+#define TCCR0B REG8(0x45) // Timer/Counter0 Control Register B
 #define CS00 0
 #define CS01 1
 #define CS02 2
@@ -115,7 +115,7 @@
 #define OCR0A REG8(0x47) // Output Compare Register A. Stores compare value A for timer/counter0
 #define OCR0B REG8(0x48) // Output Compare Register B. Stores compare value B for timer/counter0
 
-#define TIMSK0 REG8(0x6E) // Timer/Counter Interrupt Mask Register. Enable/Disable timer/counter0 interrupts
+#define TIMSK0 REG8(0x6E) // Timer/Counter0 Interrupt Mask Register. Enable/Disable timer/counter0 interrupts
 #define TOIE0 0
 #define OCIE0A 1
 #define OCIE0B 2
@@ -124,6 +124,52 @@
 #define TOV0 0
 #define OCF0A 1
 #define OCF0B 2
+
+// --- Timer/Counter1 Registers ---
+#define TCCR1A REG8(0x80) // Timer/Counter1 Control Register A
+#define WGM10 0
+#define WGM11 1
+#define COM1B0 4
+#define COM1B1 5
+#define COM1A0 6
+#define COM1A1 7
+
+#define TCCR1B REG8(0x81) // Timer/Counter1 Control Register B
+#define CS10 0
+#define CS11 1
+#define CS12 2
+#define WGM12 3
+#define WGM13 4
+#define ICES1 6
+#define ICES2 7
+
+#define TCCR1C REG8(0x82) // Timer/Counter1 Control Register C
+#define FOC1B 6
+#define FOC1A 7
+
+#define TCNT1 REG16(0x84) // Timer/Counter1
+#define TCNT1H REG8(0x85) // Higher Timer/Counter1 Bits
+#define TCNT1L REG8(0x84) // Lower Timer/Counter1 Bits
+
+#define OCR1A REG16(0x88) // Output Compare Register 1 A
+#define OCR1AH REG8(0x89) // Higher Compare Resgister 1 A Bits
+#define OCR1AL REG8(0x88) // Lower Compare Resgister 1 A Bits
+
+#define OCR1B REG16(0x8A) // Output Compare Register 1 B
+#define OCR1BH REG8(0x8B) // Higher Compare Resgister 1 B Bits
+#define OCR1BL REG8(0x8A) // Lower Compare Resgister 1 B Bits
+
+#define TIMSK1 REG8(0x6F) // Timer/Counter1 Interrupt Mask Register
+#define TOIE1 0
+#define OCIE1A 1
+#define OCIE1B 2
+#define ICIE1 5
+
+#define TIFR1 REG8(0x36) // Timer/Counter1 Interrupt Flag Register
+#define TOV1 0
+#define OCF1A 1
+#define OCF1B 2
+#define ICF1 5
 
 #define TIMER_PRESCALER_8 0b010
 #define TIMER_PRESCALER_64 0b011

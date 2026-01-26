@@ -3,8 +3,10 @@
 
 #include <stdint.h>
 
-// Access an 8 bit address
+// Access an 8 bit register
 #define REG8(addr) (*(volatile uint8_t *)(addr))
+// Access a 16 bit register
+#define REG16(addr) (*(volatile uint16_t *)(addr))
 // Left Shift 1 bit
 #define LSHB(bit) (1 << bit)
 // Inserts one "nop" instruction
