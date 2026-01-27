@@ -2,6 +2,7 @@
 #include "interrupt.h"
 #include "atmega328p.h"
 #include "utils.h"
+#include "pwm.h"
 
 #include <stdint.h>
 
@@ -40,10 +41,10 @@ void initTiming(void)
     // We ensure that there's no clock source for TCNT0
     // while we do the initial configuration
     TCCR0B = TCCR0B & ~(LSHB(CS02) | LSHB(CS01) | LSHB(CS00));
-    // We don't want any additional configurations for TCNT0
-    // since we are gonna use it in normal mode.
-    // NOTE: This probably needs to be changed when PWM is implemented
-    TCCR0A = 0;
+
+    // Additional configurations for Timer/Counter0
+    // This configures the needed PWM parameters
+    timer0ConfigPwm();
 
     // Enable timer overflow interrupt
     TIMSK0 |= LSHB(TOIE0);
