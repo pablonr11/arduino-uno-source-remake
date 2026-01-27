@@ -171,6 +171,53 @@
 #define OCF1B 2
 #define ICF1 5
 
+// --- Timer/Counter2 Registers ---
+#define TCCR2A REG8(0xB0) // Timer/Counter2 Control Register A
+#define WGM20 0
+#define WGM21 1
+#define COM2B0 4
+#define COM2B1 5
+#define COM2A0 6
+#define COM2A1 7
+
+#define TCCR2B REG8(0xB1) // Timer/Counter2 Control Register B
+#define CS20 0
+#define CS21 1
+#define CS22 2
+#define WGM22 3
+#define FOC2B 6
+#define FOC2A 7
+
+#define TCNT2 REG8(0xB2) // Timer/Counter2
+#define OCR2A REG8(0xB3) // Output Compare Register A
+#define OCR2B REG8(0xB4) // Output Compare Register B
+
+#define TIMSK2 REG8(0x70) // Timer/Counter2 Interrupt Mask Register
+#define TOIE2 0
+#define OCIE2A 1
+#define OCIE2B 2
+
+#define TIFR2 REG8(0x37) // Timer/Counter2 Interrupt Flag Register
+#define TOV2 0
+#define OCF2A 1
+#define OCF2B 2
+
+#define ASSR REG8(0xB6) // Asynchronous Status Regsiter
+#define TCR2BUB 0
+#define TCR2AUB 1
+#define OCR2BUB 2
+#define OCR2AUB 3
+#define TCN2UB 4
+#define AS2 5
+#define EXCLK 6
+
+#define GTCCR REG8(0x43) // General Timer/Counter Control Register
+#define PSRSYNC 0
+#define PSRASY 1
+#define TSM 7
+
+// NOTE: This defines can only be used for timers 0 and 1
+// Timer 2 uses another encoding
 #define TIMER_PRESCALER_8 0b010
 #define TIMER_PRESCALER_64 0b011
 #define TIMER_PRESCALER_256 0b100
