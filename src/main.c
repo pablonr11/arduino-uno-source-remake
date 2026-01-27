@@ -2,12 +2,14 @@
 #include "analog.h"
 #include "digital.h"
 #include "arduino_uno.h"
+#include "pwm.h"
 
 int main()
 {
     uint16_t analogValue = 0;
 
     initTiming();
+    initPWM();
     initAnalog();
 
     pinMode(LED_BUILTIN, OUTPUT);
