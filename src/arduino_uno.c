@@ -58,11 +58,35 @@ const uint8_t pinToPortConversor[] = {
     PC,
 };
 
+extern const uint8_t pinToTimerConversor[] = {
+    NOT_TIMER,
+    NOT_TIMER,
+    NOT_TIMER,
+    T2B,
+    NOT_TIMER,
+    T0B,
+    T0A,
+    NOT_TIMER,
+    NOT_TIMER,
+    T1A,
+    T1B,
+    T2A,
+    NOT_TIMER,
+    NOT_TIMER,
+    NOT_TIMER,
+    NOT_TIMER,
+    NOT_TIMER,
+    NOT_TIMER,
+    NOT_TIMER,
+    NOT_TIMER,
+};
+
 // Converts a port to its corresponding data direction register
 volatile uint8_t *const portToModeConversor[] = {
     &DDRB,
     &DDRC,
-    &DDRD};
+    &DDRD,
+};
 
 // Converts a port to its corresponding output register
 volatile uint8_t *const portToOutputConversor[] = {

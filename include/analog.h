@@ -23,4 +23,14 @@ void analogReference(uint8_t ref);
 
 int16_t analogRead(analog_pin pin);
 
+/**
+ * @brief Sets the analog output of a pin using PWM.
+ * This function changes the pin to OUTPUT. Calling
+ * pinMode is not needed.
+ * @param pin The pin to apply the value. Not all pins support analogWrite.
+ * Only the ones with ~.
+ * @param value The value for the pin (0-255)
+ */
+void analogWrite(uint8_t pin, uint8_t value);
+
 #endif

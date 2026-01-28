@@ -2,6 +2,14 @@
 #include "analog.h"
 #include "pwm.h"
 
+/**
+ * To run this example just connect a led
+ * with a resistance to the pin 9 in the Arduino UNO.
+ * The example will slowly increase the brightness
+ * of the led. Once the max value is reached it will
+ * slowly decrease the brightness.
+ */
+
 #define LED_PIN 9
 
 uint8_t brightness = 0;

@@ -1,5 +1,7 @@
 #include "analog.h"
 #include "utils.h"
+#include "digital.h"
+#include "arduino_uno.h"
 #include "atmega328p.h"
 
 #include <stdint.h>
@@ -57,4 +59,58 @@ int16_t analogRead(analog_pin pin)
     high = ADCH;
 
     return (high << 8) | low;
+}
+
+void analogWrite(uint8_t pin, uint8_t value)
+{
+    uint8_t timer = pinToTimerConversor[pin];
+
+    if (timer == NOT_TIMER)
+        return; // If the pin doesn't support PWM just return
+
+    // If the pin supports PWM we need to ensure its DDR is
+    // output
+    pinMode(pin, OUTPUT);
+
+    // If the value is on the edges of the timer this means
+    // the value for the pulse will always be the same.
+    // We can just write it's value using digitalWrite
+    if (value == 0)
+    {
+        digitalWrite(pin, LOW);
+        return;
+    }
+    else if (value == 255)
+    {
+        digitalWrite(pin, HIGH);
+        return;
+    }
+
+    switch (timer)
+    {
+    case T0A:
+        TCCR0A |= LSHB(COM0A1); // Connect OC0A (pin 6) to PWM
+        OCR0A = value;
+        break;
+    case T0B:
+        TCCR0A |= LSHB(COM0B1); // Connect OC0B (pin 5) to PWM
+        OCR0B = value;
+        break;
+    case T1A:
+        TCCR1A |= LSHB(COM1A1); // Connect OC1A (pin 9) to PWM
+        OCR1A = value;
+        break;
+    case T1B:
+        TCCR1A |= LSHB(COM1B1); // Connect OC1B (pin 10) to PWM
+        OCR1B = value;
+        break;
+    case T2A:
+        TCCR2A |= LSHB(COM2A1); // Connect OC2A (pin 11) to PWM
+        OCR2A = value;
+        break;
+    case T2B:
+        TCCR2A |= LSHB(COM2B1); // Connect OC2B (pin 3) to PWM
+        OCR2B = value;
+        break;
+    }
 }

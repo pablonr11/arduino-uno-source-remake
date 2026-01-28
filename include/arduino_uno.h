@@ -27,12 +27,22 @@ typedef enum
 #define PC 1
 #define PD 2
 
+// Timer indexes
+#define NOT_TIMER 0
+#define T0A 1
+#define T0B 2
+#define T1A 3
+#define T1B 4
+#define T2A 5
+#define T2B 6
+
 // For example, if we want to know the port for pin 13 in the Arduino UNO
 // We can get pinToBitConversor[13] (LSHB(5) aka. Fifth bit)
 // and pinToPortConversor[13] (PB aka. 3. This value can be mapped to a
 // register using portToXConversor arrays)
 extern const uint8_t pinToBitConversor[];
 extern const uint8_t pinToPortConversor[];
+extern const uint8_t pinToTimerConversor[];
 
 extern volatile uint8_t *const portToModeConversor[];
 extern volatile uint8_t *const portToOutputConversor[];
