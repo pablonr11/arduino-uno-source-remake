@@ -2,12 +2,25 @@
 #define _ANALOG_H
 
 #include "arduino_uno.h"
+#include "atmega328p.h"
 
 #include <stdint.h>
 
 #define DEFAULT_ANALOG_REFERENCE 1  // Internal AVcc reference
 #define EXTERNAL_ANALOG_REFERENCE 0 // External AREF pin reference
 #define INTERNAL_ANALOG_REFERENCE 3 // Internal 1.1V reference
+
+/**
+ * @brief This function is used by initTiming to configure
+ * timer0 pwm before starting the timer. Technicaly this
+ * logic could be written in initTiming, but for maintaining
+ * all PWM related code in one place we define this function.
+ */
+static inline void timer0ConfigPwm(void)
+{
+    TCCR0A |= (LSHB(WGM01) | LSHB(WGM00)); // Set Fast PWM mode
+    TCCR0B &= ~LSHB(WGM02);                // Ensure WGM02 is 0 for Fast PWM mode
+}
 
 void initAnalog(void);
 

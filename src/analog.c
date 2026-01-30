@@ -6,12 +6,7 @@
 
 #include <stdint.h>
 
-void analogReference(uint8_t ref)
-{
-    ADMUX = (ADMUX & ~(LSHB(REFS1) | LSHB(REFS0))) | ((ref & 0x03) << REFS0);
-}
-
-void initAnalog(void)
+static inline void initADC(void)
 {
     // Set voltage reference to use AVcc.
     // The Arduino UNO integrates a capacitor in AREF pin.
@@ -38,6 +33,31 @@ void initAnalog(void)
     ADCSRA |= LSHB(ADSC);
     while (ADCSRA & LSHB(ADSC))
         ;
+}
+
+static inline void initPWM(void)
+{
+    // Timer/Counter0 is already configured in timer0ConfigPwm()
+    // which is called from initTiming
+
+    // Timer/Counter1 Configuration
+    TCCR1A = LSHB(WGM10);                  // Set phase correct 8bit mode
+    TCCR1B = (TIMER_PRESCALER_64 << CS10); // Set prescaler to 64 and enable timer
+
+    // Timer/Counter2 Configuration
+    TCCR2A = LSHB(WGM20); // Set phase correct pwm mode
+    TCCR2B = LSHB(CS22);  // Set prescaler to 64 and enable timer
+}
+
+void analogReference(uint8_t ref)
+{
+    ADMUX = (ADMUX & ~(LSHB(REFS1) | LSHB(REFS0))) | ((ref & 0x03) << REFS0);
+}
+
+void initAnalog(void)
+{
+    initPWM();
+    initADC();
 }
 
 int16_t analogRead(analog_pin pin)

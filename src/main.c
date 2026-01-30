@@ -1,6 +1,5 @@
 #include "timing.h"
 #include "analog.h"
-#include "pwm.h"
 
 #define LED_PIN 9
 
@@ -10,7 +9,7 @@ int8_t step = 1;
 int main()
 {
     initTiming();
-    initPWM();
+    initAnalog();
 
     while (1)
     {
