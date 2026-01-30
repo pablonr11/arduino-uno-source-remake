@@ -1,5 +1,39 @@
 #include "digital.h"
 #include "arduino_uno.h"
+#include "atmega328p.h"
+
+/**
+ * When digitalWrite or digitalRead is called we need
+ * to ensure that PWM is disabled in the specified pin
+ * before taking any action.
+ *
+ * If the pin doesn't support PWM this doesn't need to
+ * be called
+ */
+static void turnOffPWM(uint8_t timer)
+{
+    switch (timer)
+    {
+    case T0A:
+        TCCR0A &= ~LSHB(COM0A1);
+        break;
+    case T0B:
+        TCCR0A &= ~LSHB(COM0B1);
+        break;
+    case T1A:
+        TCCR1A &= ~LSHB(COM1A1);
+        break;
+    case T1B:
+        TCCR1A &= ~LSHB(COM1B1);
+        break;
+    case T2A:
+        TCCR2A &= ~LSHB(COM2A1);
+        break;
+    case T2B:
+        TCCR2A &= ~LSHB(COM2B1);
+        break;
+    }
+}
 
 void pinMode(uint8_t pin, digital_mode mode)
 {
@@ -30,6 +64,10 @@ void digitalWrite(uint8_t pin, digital_value value)
 {
     uint8_t pinPort = pinToPortConversor[pin];
     uint8_t pinBit = pinToBitConversor[pin];
+    uint8_t pinTimer = pinToTimerConversor[pin];
+
+    if (pinTimer != NOT_TIMER)
+        turnOffPWM(pinTimer);
 
     volatile uint8_t *pinOutputRegister = portToOutputConversor[pinPort];
 
@@ -48,6 +86,10 @@ digital_value digitalRead(uint8_t pin)
 {
     uint8_t pinPort = pinToPortConversor[pin];
     uint8_t pinBit = pinToBitConversor[pin];
+    uint8_t pinTimer = pinToTimerConversor[pin];
+
+    if (pinTimer != NOT_TIMER)
+        turnOffPWM(pinTimer);
 
     volatile uint8_t *pinInputRegister = portToInputConversor[pinPort];
 
