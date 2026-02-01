@@ -1,6 +1,5 @@
 #include "timing.h"
 #include "analog.h"
-#include "pwm.h"
 
 /**
  * To run this example just connect a led

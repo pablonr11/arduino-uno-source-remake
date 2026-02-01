@@ -2,7 +2,7 @@
 #include "interrupt.h"
 #include "atmega328p.h"
 #include "utils.h"
-#include "pwm.h"
+#include "analog.h"
 
 #include <stdint.h>
 
