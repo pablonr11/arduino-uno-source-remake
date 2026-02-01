@@ -18,6 +18,7 @@ This is a list of features I would like to implement.
 * [X] UART (Serial)
 * [X] ADC
 * [X] PWM
-* [ ] I2C / SPI (Wire?)
+* [ ] I2C (Wire)
+* [ ] SPI
 
 *This readme and the project will be updated in a future*
