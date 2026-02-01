@@ -17,7 +17,7 @@ This is a list of features I would like to implement.
 * [X] Timing functions (delay, delayMicroseconds...)
 * [X] UART (Serial)
 * [X] ADC
-* [ ] PWM
+* [X] PWM
 * [ ] I2C / SPI (Wire?)
 
 *This readme and the project will be updated in a future*
