@@ -36,6 +36,10 @@ typedef enum
 #define T2A 5
 #define T2B 6
 
+// I2C pins
+#define SDA (18)
+#define SCL (19)
+
 // For example, if we want to know the port for pin 13 in the Arduino UNO
 // We can get pinToBitConversor[13] (LSHB(5) aka. Fifth bit)
 // and pinToPortConversor[13] (PB aka. 3. This value can be mapped to a
