@@ -302,4 +302,71 @@
 #define ADCL REG8(0x78) // Lower ADC Data Register
 #define ADCH REG8(0x79) // Higher ADC Data Register
 
+// --- I2C/TWI Registers ---
+#define TWBR REG8(0xB8) // I2C/TWI Bit Rate Register
+#define TWBR0 0
+#define TWBR0 1
+#define TWBR0 2
+#define TWBR0 3
+#define TWBR0 4
+#define TWBR5 5
+#define TWBR6 6
+#define TWBR7 7
+
+#define TWCR REG8(0xBC) // I2C/TWI Control Register
+#define TWIE 0
+#define TWEN 2
+#define TWWC 3
+#define TWSTO 4
+#define TWSTA 5
+#define TWEA 6
+#define TWINT 7
+
+#define TWSR REG8(0xB9) // I2C/TWI Status Register
+#define TWPS0 0
+#define TWPS1 1
+#define TWS3 3
+#define TWS4 4
+#define TWS5 5
+#define TWS6 6
+#define TWS7 7
+
+#define TWDR REG8(0xBB) // I2C/TWI Data Register
+#define TWD0 0
+#define TWD1 1
+#define TWD2 2
+#define TWD3 3
+#define TWD4 4
+#define TWD5 5
+#define TWD6 6
+#define TWD7 7
+
+#define TWAR REG8(0xBA) // I2C/TWI (Slave) Address Register
+#define TWGCE 0
+#define TWA0 1
+#define TWA1 2
+#define TWA2 3
+#define TWA3 4
+#define TWA4 5
+#define TWA5 6
+#define TWA6 7
+
+#define TWAMR REG8(0xBD) // I2C/TWI (Slave) Address Mask Register
+#define TWAM0 1
+#define TWAM1 2
+#define TWAM2 3
+#define TWAM3 4
+#define TWAM4 5
+#define TWAM5 6
+#define TWAM6 7
+
+// Only the 5 MSB in TWSR reflect the status.
+// Bit 2 is a reserved bit
+// Bits 1 and 0 are used for the prescaler.
+#define I2C_STATUS_MASK 0b11111000
+#define I2C_PRESCALER_1 0
+#define I2C_PRESCALER_4 1
+#define I2C_PRESCALER_16 2
+#define I2C_PRESCALER_64 3
+
 #endif
