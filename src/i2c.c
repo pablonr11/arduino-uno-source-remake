@@ -26,7 +26,7 @@ void initI2C(void)
     TWBR = (uint8_t)((F_CPU / I2C_FREQUENCY) - 16) / 2;
 
     // Enable acknowledge, enable i2c interface and enable i2c interrupt
-    TWCR |= LSHB(TWEA) | LSHB(TWEN) | LSHB(TWIE);
+    TWCR = LSHB(TWEA) | LSHB(TWEN) | LSHB(TWIE);
 
     I2CState = I2C_READY;
 }
