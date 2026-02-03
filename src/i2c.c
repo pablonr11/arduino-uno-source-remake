@@ -2,7 +2,16 @@
 #include "atmega328p.h"
 #include "arduino_uno.h"
 #include "digital.h"
+#include "interrupt.h"
 #include "utils.h"
+
+static volatile i2c_state I2CState;
+static volatile i2c_error I2CError;
+static volatile uint8_t i2cSlaRW;
+
+static uint8_t i2cBuffer[I2C_BUFFER_SIZE];
+static volatile uint8_t i2cBufferIndex = 0;
+static volatile uint8_t i2cBufferLength = 0;
 
 void initI2C(void)
 {
@@ -18,4 +27,132 @@ void initI2C(void)
 
     // Enable acknowledge, enable i2c interface and enable i2c interrupt
     TWCR |= LSHB(TWEA) | LSHB(TWEN) | LSHB(TWIE);
+
+    I2CState = I2C_READY;
+}
+
+uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wait)
+{
+    // If data doesn't fit in the buffer just return
+    if (dataLength > I2C_BUFFER_SIZE)
+        return 1;
+
+    // Wait until I2C is ready to start the transmission
+    // We need to wait because if any other process
+    // is taking place we shouldn't interact with the line.
+    // For example while in slave mode.
+    while (I2CState != I2C_READY)
+        ;
+
+    // Set the new state
+    I2CState = I2C_MASTER_TX;
+    // Restart error to no error
+    I2CError = I2C_NO_ERROR;
+
+    // Reset index and length values for the buffer
+    i2cBufferIndex = 0;
+    i2cBufferLength = dataLength;
+
+    // Save the data in the buffer to be processed by
+    // the interrupt
+    for (uint8_t i = 0; i < dataLength; i++)
+    {
+        i2cBuffer[i] = data[i];
+    }
+
+    // Store slave address + write
+    i2cSlaRW = I2C_WRITE; // Sets all bits to 0. Also we need LSB to be 0 to perform a write
+    i2cSlaRW |= address << 1;
+
+    // Send START
+    // Setting TWSTA transmits a START
+    TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWSTA) | LSHB(TWEN) | LSHB(TWIE);
+
+    // Wait until all data has been sent
+    while (wait && I2CState == I2C_MASTER_TX)
+        ;
+
+    if (I2CState == I2C_NO_ERROR)
+        return 0;
+    else if (I2CState == I2C_MT_SLAW_NACK_ERROR)
+        return 2;
+    else if (I2CState == I2C_MT_DATA_NACK_ERROR)
+        return 3;
+    else if (I2CState == I2C_MT_ARBITRATION_LOST_ERROR)
+        return 4;
+
+    return 5; // Shouldn't reach here?
+}
+
+void I2CContinue(uint8_t ack)
+{
+    if (ack)
+    {
+        TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWEN) | LSHB(TWIE);
+    }
+    else
+    {
+        TWCR = LSHB(TWINT) | LSHB(TWEN) | LSHB(TWIE);
+    }
+}
+
+void I2CStop(void)
+{
+    // Send STOP condition
+    TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWSTO) | LSHB(TWEN) | LSHB(TWIE);
+
+    // Wait until the stop has been sent
+    while (TWCR & LSHB(TWSTO))
+        ;
+
+    I2CState = I2C_READY;
+}
+
+void I2CRelease(void)
+{
+    // Release the bus
+    TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWEN) | LSHB(TWIE);
+
+    // Set state to ready
+    I2CState = I2C_READY;
+}
+
+ISR(TWI_vect)
+{
+    switch (I2C_STATUS)
+    {
+    case I2C_START:
+    case I2C_REPEATED_START:
+        TWDR = i2cSlaRW; // Write slave address + R/W bit
+        I2CContinue(1);  // Clear TWINT flag
+        break;
+    // Master Transmitter Mode Statuses
+    case I2C_MT_SLAW_ACK:
+    case I2C_MT_DATA_ACK:
+        // Check if there are more bytes to send
+        if (i2cBufferIndex < i2cBufferLength)
+        {
+            TWDR = i2cBuffer[i2cBufferIndex]; // Set data to send in the output buffer
+            I2CContinue(1);                   // Clear TWINT flag
+            i2cBufferIndex++;
+            break;
+        }
+        else
+        {
+            I2CStop();
+        }
+        break;
+    case I2C_MT_SLAW_NACK:
+        I2CError = I2C_MT_SLAW_NACK_ERROR;
+        I2CStop();
+        break;
+    case I2C_MT_DATA_NACK:
+        I2CError = I2C_MT_DATA_NACK_ERROR;
+        I2CStop();
+        break;
+    case I2C_MT_ARBITRATION_LOST:
+        I2CError = I2C_MT_ARBITRATION_LOST_ERROR;
+        I2CRelease();
+        break;
+    }
 }
