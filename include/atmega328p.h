@@ -305,10 +305,10 @@
 // --- I2C/TWI Registers ---
 #define TWBR REG8(0xB8) // I2C/TWI Bit Rate Register
 #define TWBR0 0
-#define TWBR0 1
-#define TWBR0 2
-#define TWBR0 3
-#define TWBR0 4
+#define TWBR1 1
+#define TWBR2 2
+#define TWBR3 3
+#define TWBR4 4
 #define TWBR5 5
 #define TWBR6 6
 #define TWBR7 7
