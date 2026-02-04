@@ -5,8 +5,8 @@
 #include "interrupt.h"
 #include "utils.h"
 
-static volatile i2c_state I2CState;
-static volatile i2c_error I2CError;
+static volatile i2c_state i2cState;
+static volatile i2c_error i2cError;
 static volatile uint8_t i2cSlaRW;
 
 static uint8_t i2cBuffer[I2C_BUFFER_SIZE];
@@ -28,10 +28,10 @@ void initI2C(void)
     // Enable acknowledge, enable i2c interface and enable i2c interrupt
     TWCR = LSHB(TWEA) | LSHB(TWEN) | LSHB(TWIE);
 
-    I2CState = I2C_READY;
+    i2cState = I2C_READY;
 }
 
-uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wait)
+uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wait, uint8_t stop)
 {
     // If data doesn't fit in the buffer just return
     if (dataLength > I2C_BUFFER_SIZE)
@@ -41,13 +41,13 @@ uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wai
     // We need to wait because if any other process
     // is taking place we shouldn't interact with the line.
     // For example while in slave mode.
-    while (I2CState != I2C_READY)
+    while (i2cState != I2C_READY)
         ;
 
     // Set the new state
-    I2CState = I2C_MASTER_TX;
+    i2cState = I2C_MASTER_TX;
     // Restart error to no error
-    I2CError = I2C_NO_ERROR;
+    i2cError = I2C_NO_ERROR;
 
     // Reset index and length values for the buffer
     i2cBufferIndex = 0;
@@ -69,16 +69,16 @@ uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wai
     TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWSTA) | LSHB(TWEN) | LSHB(TWIE);
 
     // Wait until all data has been sent
-    while (wait && I2CState == I2C_MASTER_TX)
+    while (wait && i2cState == I2C_MASTER_TX)
         ;
 
-    if (I2CState == I2C_NO_ERROR)
+    if (i2cState == I2C_NO_ERROR)
         return 0;
-    else if (I2CState == I2C_MT_SLAW_NACK_ERROR)
+    else if (i2cState == I2C_MT_SLAW_NACK_ERROR)
         return 2;
-    else if (I2CState == I2C_MT_DATA_NACK_ERROR)
+    else if (i2cState == I2C_MT_DATA_NACK_ERROR)
         return 3;
-    else if (I2CState == I2C_MT_ARBITRATION_LOST_ERROR)
+    else if (i2cState == I2C_MT_ARBITRATION_LOST_ERROR)
         return 4;
 
     return 5; // Shouldn't reach here?
@@ -105,7 +105,7 @@ void I2CStop(void)
     while (TWCR & LSHB(TWSTO))
         ;
 
-    I2CState = I2C_READY;
+    i2cState = I2C_READY;
 }
 
 void I2CRelease(void)
@@ -114,7 +114,7 @@ void I2CRelease(void)
     TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWEN) | LSHB(TWIE);
 
     // Set state to ready
-    I2CState = I2C_READY;
+    i2cState = I2C_READY;
 }
 
 ISR(TWI_vect)
@@ -143,15 +143,15 @@ ISR(TWI_vect)
         }
         break;
     case I2C_MT_SLAW_NACK:
-        I2CError = I2C_MT_SLAW_NACK_ERROR;
+        i2cError = I2C_MT_SLAW_NACK_ERROR;
         I2CStop();
         break;
     case I2C_MT_DATA_NACK:
-        I2CError = I2C_MT_DATA_NACK_ERROR;
+        i2cError = I2C_MT_DATA_NACK_ERROR;
         I2CStop();
         break;
     case I2C_MT_ARBITRATION_LOST:
-        I2CError = I2C_MT_ARBITRATION_LOST_ERROR;
+        i2cError = I2C_MT_ARBITRATION_LOST_ERROR;
         I2CRelease();
         break;
     }
