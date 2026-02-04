@@ -64,6 +64,8 @@ void initI2C(void);
  * @param data Array with the data we want to write to the device.
  * @param dataLength Number of bytes in data.
  * @param wait Indicates if we need to wait until all the data has been sent
+ * @param stop If is true a stop condition will be sent when there's no more data
+ * to send. If false no stop condition will be sent.
  * @return 0 if no error ocurred during transmission.
  * 1 If data length is to long for the buffer
  * 2 NACK received after sending SLAW
@@ -71,7 +73,7 @@ void initI2C(void);
  * 4 arbitration lost
  * 5 other error
  */
-uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wait);
+uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wait, uint8_t sendStop);
 
 /**
  * @brief This is mainly used to clear the TWINT flag.

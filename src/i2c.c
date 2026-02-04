@@ -8,6 +8,8 @@
 static volatile i2c_state i2cState;
 static volatile i2c_error i2cError;
 static volatile uint8_t i2cSlaRW;
+static volatile uint8_t i2cSendStop;
+static volatile uint8_t i2cSentRepStart;
 
 static uint8_t i2cBuffer[I2C_BUFFER_SIZE];
 static volatile uint8_t i2cBufferIndex = 0;
@@ -29,9 +31,11 @@ void initI2C(void)
     TWCR = LSHB(TWEA) | LSHB(TWEN) | LSHB(TWIE);
 
     i2cState = I2C_READY;
+    i2cSendStop = 1;
+    i2cSentRepStart = 0;
 }
 
-uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wait, uint8_t stop)
+uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wait, uint8_t sendStop)
 {
     // If data doesn't fit in the buffer just return
     if (dataLength > I2C_BUFFER_SIZE)
@@ -48,6 +52,7 @@ uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wai
     i2cState = I2C_MASTER_TX;
     // Restart error to no error
     i2cError = I2C_NO_ERROR;
+    i2cSendStop = sendStop;
 
     // Reset index and length values for the buffer
     i2cBufferIndex = 0;
@@ -64,9 +69,27 @@ uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wai
     i2cSlaRW = I2C_WRITE; // Sets all bits to 0. Also we need LSB to be 0 to perform a write
     i2cSlaRW |= address << 1;
 
-    // Send START
-    // Setting TWSTA transmits a START
-    TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWSTA) | LSHB(TWEN) | LSHB(TWIE);
+    if (i2cSentRepStart)
+    {
+        i2cSentRepStart = 0;
+
+        // If we are already in a repeated START we have
+        // to load SLA+R in TWDR
+        do
+        {
+            TWDR = i2cSlaRW;
+        } while (TWCR & LSHB(TWWC)); // If we tried to write but we couldn't try to write again
+
+        // Enables interrupts again
+        // Basicaly restores the original configuration
+        I2CContinue(1);
+    }
+    else
+    {
+        // Send START
+        // Setting TWSTA transmits a START
+        TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWSTA) | LSHB(TWEN) | LSHB(TWIE);
+    }
 
     // Wait until all data has been sent
     while (wait && i2cState == I2C_MASTER_TX)
@@ -139,7 +162,23 @@ ISR(TWI_vect)
         }
         else
         {
-            I2CStop();
+            if (i2cSendStop)
+            {
+                I2CStop();
+            }
+            else
+            {
+                // If an stop is not sent here we can assume the bus
+                // is going to be used again so we can send another
+                // start here. Since we don't have the new data we
+                // have to disable interrupts until the next step is
+                // taken. Here we save a flag indicating we are already
+                // in a repeated start, so in the next iteration
+                // outside the ISR we should write SLARW
+                TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWSTA) | LSHB(TWEN);
+                i2cSentRepStart = 1;
+                i2cState = I2C_READY;
+            }
         }
         break;
     case I2C_MT_SLAW_NACK:
