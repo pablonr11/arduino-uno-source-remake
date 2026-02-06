@@ -74,7 +74,7 @@ uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wai
         i2cSentRepStart = 0;
 
         // If we are already in a repeated START we have
-        // to load SLA+R in TWDR
+        // to load SLA+W in TWDR
         do
         {
             TWDR = i2cSlaRW;
@@ -105,6 +105,78 @@ uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wai
         return 4;
 
     return 5; // Shouldn't reach here?
+}
+
+uint8_t I2CRead(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t sendStop)
+{
+    // If data doesn't fit in the buffer just return
+    if (dataLength > I2C_BUFFER_SIZE)
+        return 0;
+
+    // Wait until I2C is ready to start the transmission
+    // We need to wait because if any other process
+    // is taking place we shouldn't interact with the line.
+    // For example while in slave mode.
+    while (i2cState != I2C_READY)
+        ;
+
+    i2cState = I2C_MASTER_RX; // Set the new state
+    i2cSendStop = sendStop;   // Save if we are going to send STOP at the end
+
+    // Reset index and length values for the buffer
+    i2cBufferIndex = 0;
+    // We need to substract 1 from length.
+    // The reason for that is because after sending SLAR+ACK
+    // we will get already a byte.
+    // For example: If we want to read 1 byte
+    // After sending SLAR and receiving ACK the slave will start
+    // sending the byte inmediatly. Once we obtained the byte we don't
+    // want to send an ACK because this will fetch another byte.
+    // So, index (0) < dataLength - 1 (0) is false. In I2C_MR_SLAR_ACK
+    // case we are configuring the NACK for that case.
+    i2cBufferLength = dataLength - 1;
+
+    // Store slave address + read
+    i2cSlaRW = I2C_READ; // Sets all bits to 0 and 1 in the LSB. LSB has to be 1 to send READ
+    i2cSlaRW |= address << 1;
+
+    if (i2cSentRepStart)
+    {
+        i2cSentRepStart = 0;
+
+        // If we are already in a repeated START we have
+        // to load SLA+R in TWDR
+        do
+        {
+            TWDR = i2cSlaRW;
+        } while (TWCR & LSHB(TWWC)); // If we tried to write but we couldn't try to write again
+
+        // Enables interrupts again
+        // Basicaly restores the original configuration
+        I2CContinue(1);
+    }
+    else
+    {
+        // Send START
+        // Setting TWSTA transmits a START
+        TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWSTA) | LSHB(TWEN) | LSHB(TWIE);
+    }
+
+    // Wait until reading has finished
+    while (i2cState == I2C_MASTER_RX)
+        ;
+
+    // Now i2cBufferIndex should equal the number of bytes
+    // received. i2cBufferIndex is always increased after
+    // reading from TWDR and writing to the buffer
+
+    // Copy the read data from the buffer to data
+    for (uint8_t i = 0; i < i2cBufferIndex; i++)
+    {
+        data[i] = i2cBuffer[i];
+    }
+
+    return i2cBufferIndex;
 }
 
 void I2CContinue(uint8_t ack)
@@ -189,7 +261,42 @@ ISR(TWI_vect)
         i2cError = I2C_MT_DATA_NACK_ERROR;
         I2CStop();
         break;
-    case I2C_MT_ARBITRATION_LOST:
+    // Master Receiver Mode Statuses
+    case I2C_MR_DATA_ACK:
+        i2cBuffer[i2cBufferIndex] = TWDR;
+        i2cBufferIndex++;
+        // ! This continues in the next case
+    case I2C_MR_SLAR_ACK:
+        // If there are more bytes to read send ACK. Otherwise send NACK
+        I2CContinue((uint8_t)(i2cBufferIndex < i2cBufferLength));
+        break;
+    case I2C_MR_DATA_NACK:
+        i2cBuffer[i2cBufferIndex] = TWDR; // Last received byte
+        i2cBufferIndex++;
+        // Now we should send an stop or a repeated start
+        if (i2cSendStop)
+        {
+            I2CStop();
+        }
+        else
+        {
+            // If an stop is not sent here we can assume the bus
+            // is going to be used again so we can send another
+            // start here. Since we don't have the new data we
+            // have to disable interrupts until the next step is
+            // taken. Here we save a flag indicating we are already
+            // in a repeated start, so in the next iteration
+            // outside the ISR we should write SLARW
+            TWCR = LSHB(TWINT) | LSHB(TWEA) | LSHB(TWSTA) | LSHB(TWEN);
+            i2cSentRepStart = 1;
+            i2cState = I2C_READY;
+        }
+        break;
+    case I2C_MR_SLAR_NACK:
+        I2CStop();
+        break;
+
+    case I2C_ARBITRATION_LOST:
         i2cError = I2C_MT_ARBITRATION_LOST_ERROR;
         I2CRelease();
         break;

@@ -30,12 +30,17 @@
 #define I2C_MT_SLAW_NACK 0x20
 #define I2C_MT_DATA_ACK 0x28
 #define I2C_MT_DATA_NACK 0x30
-#define I2C_MT_ARBITRATION_LOST 0x38
+#define I2C_ARBITRATION_LOST 0x38
+#define I2C_MR_SLAR_ACK 0x40
+#define I2C_MR_SLAR_NACK 0x48
+#define I2C_MR_DATA_ACK 0x50
+#define I2C_MR_DATA_NACK 0x58
 
 typedef enum
 {
     I2C_READY = 0,
-    I2C_MASTER_TX
+    I2C_MASTER_TX,
+    I2C_MASTER_RX
 } i2c_state;
 
 typedef enum
@@ -74,6 +79,18 @@ void initI2C(void);
  * 5 other error
  */
 uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wait, uint8_t sendStop);
+
+/**
+ * @brief Used to read data as master receiver
+ * @param address The addres of the device we want to
+ * read from. Addresses are 7 bits. The MSB will be ignored
+ * @param data Array were the response will be outputed
+ * @param dataLength Number of bytes to read
+ * @param stop If is true a stop condition will be sent when there's no more data
+ * to read. If false no stop condition will be sent.
+ * @return Number of bytes read.
+ */
+uint8_t I2CRead(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t sendStop);
 
 /**
  * @brief This is mainly used to clear the TWINT flag.
