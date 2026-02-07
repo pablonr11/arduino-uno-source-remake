@@ -9,6 +9,20 @@
 #include <string.h>
 #include <stdint.h>
 
+// This example uses a RTC DS1307 to test the implementation of
+// I2CWrite and I2CRead.
+// I2CWrite is used in setupDS1307RTC to do the initial configuration
+// of the module. The function uses __DATE__ and __TIME__ to get the
+// date and time in compilation time. This process should only be
+// executed once. Doing it again will overwrite the values in the RTC
+// with wrong values. This is why after writing the time we should
+// comment SETUP_RTC define, build and flash again to avoid
+// overwriting the values when the Arduino UNO is restarted.
+// I2CRead is used to read the values back from the DS1307 and print
+// them through serial. This is implemented in readDS1307RTC, which first,
+// sets the DS1307 pointer to the seconds address using I2CWrite without
+// the stop condition and then reads 7 values from there on.
+
 // If RTC is already configured just comment this line
 // and upload the program again.
 // This avoids configuring the RTC everytime on start.
