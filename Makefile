@@ -6,6 +6,7 @@ F_CPU 	= 16000000
 CC 		= avr-gcc
 OBJCOPY = avr-objcopy
 AVRDUDE = avrdude
+AVRSIZE = avr-size
 
 PORT	= COM4
 BAUD	= 115200
@@ -52,6 +53,9 @@ $(HEX): $(ELF)
 
 flash: $(HEX)
 	$(AVRDUDE) -v -V -p $(MCU) -c $(PROGRAMMER) -P $(PORT) -b $(BAUD) -D -U flash:w:$<:i
+
+size: $(ELF)
+	$(AVRSIZE) --mcu=$(MCU) --format=avr $(ELF)
 
 clean:
 	rm -rf $(BUILD)
