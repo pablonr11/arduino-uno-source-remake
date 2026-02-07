@@ -58,7 +58,7 @@ const uint8_t pinToPortConversor[] = {
     PC,
 };
 
-extern const uint8_t pinToTimerConversor[] = {
+const uint8_t pinToTimerConversor[] = {
     NOT_TIMER,
     NOT_TIMER,
     NOT_TIMER,
