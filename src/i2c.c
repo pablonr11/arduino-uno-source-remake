@@ -25,7 +25,7 @@ void initI2C(void)
     TWSR &= ~(LSHB(TWPS1) | LSHB(TWPS0));
 
     // Set Bit Rate
-    TWBR = (uint8_t)((F_CPU / I2C_FREQUENCY) - 16) / 2;
+    TWBR = (uint8_t)(((F_CPU / I2C_FREQUENCY) - 16) / 2);
 
     // Enable acknowledge, enable i2c interface and enable i2c interrupt
     TWCR = LSHB(TWEA) | LSHB(TWEN) | LSHB(TWIE);
@@ -95,13 +95,13 @@ uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wai
     while (wait && i2cState == I2C_MASTER_TX)
         ;
 
-    if (i2cState == I2C_NO_ERROR)
+    if (i2cError == I2C_NO_ERROR)
         return 0;
-    else if (i2cState == I2C_MT_SLAW_NACK_ERROR)
+    else if (i2cError == I2C_MT_SLAW_NACK_ERROR)
         return 2;
-    else if (i2cState == I2C_MT_DATA_NACK_ERROR)
+    else if (i2cError == I2C_MT_DATA_NACK_ERROR)
         return 3;
-    else if (i2cState == I2C_MT_ARBITRATION_LOST_ERROR)
+    else if (i2cError == I2C_MT_ARBITRATION_LOST_ERROR)
         return 4;
 
     return 5; // Shouldn't reach here?
