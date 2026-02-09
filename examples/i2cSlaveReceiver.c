@@ -5,6 +5,15 @@
 
 #include <stdint.h>
 
+// In this example we use I2CSetAddress to set an
+// address that the ATMega328P will listen to in
+// the I2C/TWI interface.
+// We use I2CAttachSlaveRxCb to attach i2cOnReceive
+// as a callback for the i2c receive event.
+// When a receive is completed in the I2C the callback
+// saves the received data into a separated buffer and
+// prints its contents through serial
+
 #define I2C_SLAVE_ADDR 0x55 // Own i2c address
 
 #define I2C_RX_BUFFER_SIZE (I2C_BUFFER_SIZE + 1)
