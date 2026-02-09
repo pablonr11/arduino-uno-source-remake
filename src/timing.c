@@ -1,4 +1,4 @@
-#include "timing.h";
+#include "timing.h"
 #include "interrupt.h"
 #include "atmega328p.h"
 #include "utils.h"
