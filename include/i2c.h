@@ -26,21 +26,37 @@
 // I2C possible status values in TWSR
 #define I2C_START 0x08
 #define I2C_REPEATED_START 0x10
+// Master transmitter
 #define I2C_MT_SLAW_ACK 0x18
 #define I2C_MT_SLAW_NACK 0x20
 #define I2C_MT_DATA_ACK 0x28
 #define I2C_MT_DATA_NACK 0x30
 #define I2C_ARBITRATION_LOST 0x38
+// Master receiver
 #define I2C_MR_SLAR_ACK 0x40
 #define I2C_MR_SLAR_NACK 0x48
 #define I2C_MR_DATA_ACK 0x50
 #define I2C_MR_DATA_NACK 0x58
+// Slave transmitter
+#define I2C_SR_SLAW_ACK 0x60
+#define I2C_SR_MARBLOST_SLAW_ACK 0x68 // Arbitration lost as master, received own SLA+W and sent ACK
+#define I2C_SR_GENERAL_CALL_ACK 0x70
+#define I2C_SR_MARBLOST_GENERAL_CALL_ACK 0x78 // Arbitration lost as master, general call received and sent ACK
+#define I2C_SR_SLAW_DATA_ACK 0x80
+#define I2C_SR_SLAW_DATA_NACK 0x88
+#define I2C_SR_GENERAL_CALL_DATA_ACK 0x90
+#define I2C_SR_GENERAL_CALL_DATA_NACK 0x98
+#define I2C_SR_STO_STA 0xA0
+
+// Callback type for slave receive
+typedef void (*i2cOnSlaveRx)(uint8_t *, uint8_t);
 
 typedef enum
 {
     I2C_READY = 0,
     I2C_MASTER_TX,
-    I2C_MASTER_RX
+    I2C_MASTER_RX,
+    I2C_SLAVE_RX
 } i2c_state;
 
 typedef enum
@@ -113,5 +129,21 @@ void I2CStop(void);
  * wront with a transmission and a stop can't be sent.
  */
 void I2CRelease(void);
+
+/**
+ * @brief Sets the address for slave mode
+ * @param address The address to listen to.
+ * The address is 7 bits long, so the MSB will be ignored.
+ */
+void I2CSetAddress(uint8_t address);
+
+/**
+ * @brief Used to attach a function callback for the slave
+ * receive. The attached function will be called once
+ * the transmission in finished. (When the master sends a
+ * STOP or a REPEATED START)
+ * @param cb The callback function
+ */
+void I2CAttachSlaveRxCb(i2cOnSlaveRx cb);
 
 #endif

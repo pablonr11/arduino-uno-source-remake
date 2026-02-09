@@ -11,9 +11,14 @@ static volatile uint8_t i2cSlaRW;
 static volatile uint8_t i2cSendStop;
 static volatile uint8_t i2cSentRepStart;
 
-static uint8_t i2cBuffer[I2C_BUFFER_SIZE];
-static volatile uint8_t i2cBufferIndex = 0;
-static volatile uint8_t i2cBufferLength = 0;
+static uint8_t i2cMasterBuffer[I2C_BUFFER_SIZE];
+static volatile uint8_t i2cMasterBufferIndex = 0;
+static volatile uint8_t i2cMasterBufferLength = 0;
+
+static uint8_t i2cSlaveRxBuffer[I2C_BUFFER_SIZE];
+static volatile uint8_t i2cSlaveRxBufferIndex = 0;
+
+static i2cOnSlaveRx i2cOnSlaveRxCb;
 
 void initI2C(void)
 {
@@ -55,14 +60,14 @@ uint8_t I2CWrite(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t wai
     i2cSendStop = sendStop;
 
     // Reset index and length values for the buffer
-    i2cBufferIndex = 0;
-    i2cBufferLength = dataLength;
+    i2cMasterBufferIndex = 0;
+    i2cMasterBufferLength = dataLength;
 
     // Save the data in the buffer to be processed by
     // the interrupt
     for (uint8_t i = 0; i < dataLength; i++)
     {
-        i2cBuffer[i] = data[i];
+        i2cMasterBuffer[i] = data[i];
     }
 
     // Store slave address + write
@@ -124,7 +129,7 @@ uint8_t I2CRead(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t send
     i2cSendStop = sendStop;   // Save if we are going to send STOP at the end
 
     // Reset index and length values for the buffer
-    i2cBufferIndex = 0;
+    i2cMasterBufferIndex = 0;
     // We need to substract 1 from length.
     // The reason for that is because after sending SLAR+ACK
     // we will get already a byte.
@@ -134,7 +139,7 @@ uint8_t I2CRead(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t send
     // want to send an ACK because this will fetch another byte.
     // So, index (0) < dataLength - 1 (0) is false. In I2C_MR_SLAR_ACK
     // case we are configuring the NACK for that case.
-    i2cBufferLength = dataLength - 1;
+    i2cMasterBufferLength = dataLength - 1;
 
     // Store slave address + read
     i2cSlaRW = I2C_READ; // Sets all bits to 0 and 1 in the LSB. LSB has to be 1 to send READ
@@ -166,17 +171,17 @@ uint8_t I2CRead(uint8_t address, uint8_t *data, uint8_t dataLength, uint8_t send
     while (i2cState == I2C_MASTER_RX)
         ;
 
-    // Now i2cBufferIndex should equal the number of bytes
-    // received. i2cBufferIndex is always increased after
+    // Now i2cMasterBufferIndex should equal the number of bytes
+    // received. i2cMasterBufferIndex is always increased after
     // reading from TWDR and writing to the buffer
 
     // Copy the read data from the buffer to data
-    for (uint8_t i = 0; i < i2cBufferIndex; i++)
+    for (uint8_t i = 0; i < i2cMasterBufferIndex; i++)
     {
-        data[i] = i2cBuffer[i];
+        data[i] = i2cMasterBuffer[i];
     }
 
-    return i2cBufferIndex;
+    return i2cMasterBufferIndex;
 }
 
 void I2CContinue(uint8_t ack)
@@ -212,6 +217,18 @@ void I2CRelease(void)
     i2cState = I2C_READY;
 }
 
+void I2CSetAddress(uint8_t address)
+{
+    // Bit 0 in TWAR is to enable/listen for general calls (0x00)
+    // By default we are disabling it
+    TWAR = (address << 1);
+}
+
+void I2CAttachSlaveRxCb(i2cOnSlaveRx cb)
+{
+    i2cOnSlaveRxCb = cb;
+}
+
 ISR(TWI_vect)
 {
     switch (I2C_STATUS)
@@ -225,11 +242,11 @@ ISR(TWI_vect)
     case I2C_MT_SLAW_ACK:
     case I2C_MT_DATA_ACK:
         // Check if there are more bytes to send
-        if (i2cBufferIndex < i2cBufferLength)
+        if (i2cMasterBufferIndex < i2cMasterBufferLength)
         {
-            TWDR = i2cBuffer[i2cBufferIndex]; // Set data to send in the output buffer
-            I2CContinue(1);                   // Clear TWINT flag
-            i2cBufferIndex++;
+            TWDR = i2cMasterBuffer[i2cMasterBufferIndex]; // Set data to send in the output buffer
+            I2CContinue(1);                               // Clear TWINT flag
+            i2cMasterBufferIndex++;
             break;
         }
         else
@@ -263,16 +280,16 @@ ISR(TWI_vect)
         break;
     // Master Receiver Mode Statuses
     case I2C_MR_DATA_ACK:
-        i2cBuffer[i2cBufferIndex] = TWDR;
-        i2cBufferIndex++;
+        i2cMasterBuffer[i2cMasterBufferIndex] = TWDR;
+        i2cMasterBufferIndex++;
         // ! This continues in the next case
     case I2C_MR_SLAR_ACK:
         // If there are more bytes to read send ACK. Otherwise send NACK
-        I2CContinue((uint8_t)(i2cBufferIndex < i2cBufferLength));
+        I2CContinue((uint8_t)(i2cMasterBufferIndex < i2cMasterBufferLength));
         break;
     case I2C_MR_DATA_NACK:
-        i2cBuffer[i2cBufferIndex] = TWDR; // Last received byte
-        i2cBufferIndex++;
+        i2cMasterBuffer[i2cMasterBufferIndex] = TWDR; // Last received byte
+        i2cMasterBufferIndex++;
         // Now we should send an stop or a repeated start
         if (i2cSendStop)
         {
@@ -299,6 +316,50 @@ ISR(TWI_vect)
     case I2C_ARBITRATION_LOST:
         i2cError = I2C_MT_ARBITRATION_LOST_ERROR;
         I2CRelease();
+        break;
+    // Slave Receiver Mode Statuses
+    case I2C_SR_SLAW_ACK:
+    case I2C_SR_MARBLOST_SLAW_ACK:
+    case I2C_SR_GENERAL_CALL_ACK:
+    case I2C_SR_MARBLOST_GENERAL_CALL_ACK:
+        i2cState = I2C_SLAVE_RX;   // Set i2c state to avoid master modes
+        i2cSlaveRxBufferIndex = 0; // Set index to override rx buffer
+        I2CContinue(1);            // Send ACK when we receive the first byte
+        break;
+    case I2C_SR_SLAW_DATA_ACK:
+    case I2C_SR_GENERAL_CALL_DATA_ACK:
+        if (i2cSlaveRxBufferIndex < I2C_BUFFER_SIZE)
+        {
+            i2cSlaveRxBuffer[i2cSlaveRxBufferIndex] = TWDR; // Save data to buffer
+            i2cSlaveRxBufferIndex++;                        // Increase buffer index
+            I2CContinue(1);                                 // Send ACK
+        }
+        else
+        {
+            I2CContinue(0); // Senc NACK
+        }
+        break;
+    case I2C_SR_SLAW_DATA_NACK:
+    case I2C_SR_GENERAL_CALL_DATA_NACK:
+        // Here we received one more byte from the master
+        // but we can't store it in the buffer because is full.
+        // After sending the NACK the master should send a STOP
+        // so we disable ACKs here and then enable them again
+        // in I2C_SR_STO_STA case.
+        I2CContinue(0);
+        break;
+    case I2C_SR_STO_STA:
+        // Enable ACKs again and set i2c state to ready
+        I2CRelease();
+
+        // Insert null character if there's more space in the buffer
+        if (i2cSlaveRxBufferIndex < I2C_BUFFER_SIZE)
+        {
+            i2cSlaveRxBuffer[i2cSlaveRxBufferIndex] = '\0';
+        }
+
+        i2cOnSlaveRxCb(i2cSlaveRxBuffer, i2cSlaveRxBufferIndex);
+
         break;
     }
 }
