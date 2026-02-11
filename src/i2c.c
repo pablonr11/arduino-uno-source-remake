@@ -15,10 +15,15 @@ static uint8_t i2cMasterBuffer[I2C_BUFFER_SIZE];
 static volatile uint8_t i2cMasterBufferIndex = 0;
 static volatile uint8_t i2cMasterBufferLength = 0;
 
+static uint8_t i2cSlaveTxBuffer[I2C_BUFFER_SIZE];
+static volatile uint8_t i2cSlaveTxBufferIndex = 0;
+static volatile uint8_t i2cSlaveTxBufferLength = 0;
+
 static uint8_t i2cSlaveRxBuffer[I2C_BUFFER_SIZE];
 static volatile uint8_t i2cSlaveRxBufferIndex = 0;
 
 static i2cOnSlaveRx i2cOnSlaveRxCb;
+static i2cOnSlaveTx i2cOnSlaveTxCb;
 
 void initI2C(void)
 {
@@ -229,6 +234,29 @@ void I2CAttachSlaveRxCb(i2cOnSlaveRx cb)
     i2cOnSlaveRxCb = cb;
 }
 
+void I2CAttachSlaveTxCb(i2cOnSlaveTx cb)
+{
+    i2cOnSlaveTxCb = cb;
+}
+
+uint8_t I2CSetSlaveTxData(uint8_t *data, uint8_t dataLength)
+{
+    // If the data is to big return error
+    if (dataLength + i2cSlaveTxBufferLength > I2C_BUFFER_SIZE)
+    {
+        return 0;
+    }
+
+    // Append data to the buffer
+    for (uint8_t i = 0; i < dataLength; i++)
+    {
+        i2cSlaveTxBuffer[i + i2cSlaveTxBufferLength] = data[i];
+    }
+    i2cSlaveTxBufferLength += dataLength;
+
+    return 1;
+}
+
 ISR(TWI_vect)
 {
     switch (I2C_STATUS)
@@ -360,6 +388,57 @@ ISR(TWI_vect)
 
         i2cOnSlaveRxCb(i2cSlaveRxBuffer, i2cSlaveRxBufferIndex);
 
+        break;
+    // Slave Transmitter Mode Statuses
+    case I2C_ST_SLAR_ACK:
+    case I2C_ST_MARBLOST_SLAR_ACK:
+        i2cState = I2C_SLAVE_TX; // Set i2c state to avoid master modes
+        // Restart TX buffer index and length before calling
+        // onSlaveTx callback.
+        // The callback could call I2CSetSlaveTxData multiple times.
+        i2cSlaveTxBufferIndex = 0;
+        i2cSlaveTxBufferLength = 0;
+
+        // Call the callback. This should fill the buffer
+        // The user has to call I2CSetSlaveTxData to fill
+        // the buffer
+        i2cOnSlaveTxCb();
+
+        // We need to send at least one byte.
+        // If the buffer is still empty send a 0x00 and NACK
+        if (i2cSlaveTxBufferLength == 0)
+        {
+            i2cSlaveTxBuffer[0] = 0;
+            i2cSlaveTxBufferLength = 1;
+        }
+        // ! This continues in the next case.
+        // ! The next case sends the data
+    case I2C_ST_DATA_ACK:
+        // Load the byte in TWDR
+        TWDR = i2cSlaveTxBuffer[i2cSlaveTxBufferIndex];
+        i2cSlaveTxBufferIndex++;
+
+        // Here the TWEA bit in TWCR indicates if the
+        // last byte has been sent.
+        // If there are more bytes to send set TWEA
+        // Otherwise clear it.
+        if (i2cSlaveTxBufferIndex < i2cSlaveTxBufferLength)
+        {
+            I2CContinue(1); // There's more data
+        }
+        else
+        {
+            I2CContinue(0); // No more data to send
+        }
+        break;
+    case I2C_ST_DATA_NACK:
+    case I2C_ST_LAST_BYTE_ACK:
+        // If we receive a NACK or don't have more data to send
+
+        // If we reached here because we don't have more byte
+        // we should enable ACKs again for the future
+        I2CContinue(1);
+        i2cState = I2C_READY;
         break;
     }
 }

@@ -37,7 +37,7 @@
 #define I2C_MR_SLAR_NACK 0x48
 #define I2C_MR_DATA_ACK 0x50
 #define I2C_MR_DATA_NACK 0x58
-// Slave transmitter
+// Slave receiver
 #define I2C_SR_SLAW_ACK 0x60
 #define I2C_SR_MARBLOST_SLAW_ACK 0x68 // Arbitration lost as master, received own SLA+W and sent ACK
 #define I2C_SR_GENERAL_CALL_ACK 0x70
@@ -47,16 +47,24 @@
 #define I2C_SR_GENERAL_CALL_DATA_ACK 0x90
 #define I2C_SR_GENERAL_CALL_DATA_NACK 0x98
 #define I2C_SR_STO_STA 0xA0
+// Slave transmitter
+#define I2C_ST_SLAR_ACK 0xA8
+#define I2C_ST_MARBLOST_SLAR_ACK 0xB0
+#define I2C_ST_DATA_ACK 0xB8
+#define I2C_ST_DATA_NACK 0xC0
+#define I2C_ST_LAST_BYTE_ACK 0xC8
 
-// Callback type for slave receive
+// Callback type for slave recieve
 typedef void (*i2cOnSlaveRx)(uint8_t *, uint8_t);
-
+// Callback type for slave transmitter
+typedef void (*i2cOnSlaveTx)();
 typedef enum
 {
     I2C_READY = 0,
     I2C_MASTER_TX,
     I2C_MASTER_RX,
-    I2C_SLAVE_RX
+    I2C_SLAVE_RX,
+    I2C_SLAVE_TX,
 } i2c_state;
 
 typedef enum
@@ -146,4 +154,25 @@ void I2CSetAddress(uint8_t address);
  */
 void I2CAttachSlaveRxCb(i2cOnSlaveRx cb);
 
+/**
+ * @brief Used to attach a function callback for the slave
+ * transmit. The attached function will be called before the
+ * transmission is started, after receiving SLAR and sending
+ * the ACK.
+ * @param cb The callback function
+ */
+void I2CAttachSlaveTxCb(i2cOnSlaveTx cb);
+
+/**
+ * @brief Calling this function sets the data that will
+ * be sent when the slave transmitter mode is entered.
+ * This function should be called in the i2cOnSlaveTx
+ * callback.
+ * @param data A pointer to the data to be sent
+ * @param dataLength Length of the data to be sent. Has to be lower than I2C_BUFFER_SIZE.
+ * @return Error code:
+ * 0 -> dataLength to big
+ * 1 -> No error
+ */
+uint8_t I2CSetSlaveTxData(uint8_t *data, uint8_t dataLength);
 #endif
