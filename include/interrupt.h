@@ -5,6 +5,11 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 // Enable interrupts setting the global interrupt mask.
 #define SEI() __asm__("sei")
 // Disable interrupts setting the global interrupt mask.
@@ -54,40 +59,44 @@
 #define INVALID_PIN_INTERRUPT -1
 #define EXTERNAL_INTERRUPTS_NUMBER 2 // Specific number of external interrupts.
 
-typedef enum
-{
-    LOW_LEVEL = 0,
-    ANY,
-    FALLING_EDGE,
-    RISING_EDGE
-} external_interrupt_mode;
+    typedef enum
+    {
+        LOW_LEVEL = 0,
+        ANY,
+        FALLING_EDGE,
+        RISING_EDGE
+    } external_interrupt_mode;
 
-/**
- * @brief Converts a digital pin to the interrupt index used by attachInterrupt and detachInterrupt
- * @param pin The pin to enable the interrupt. (Accepted pins are 2 and 3)
- * @return The interrupt index used by attachInterrupt and detachInterrupt.
- * If pin is not a valid value INVALID_PIN_INTERRUPT is returned instead
- *
- * @note Technically Arduino UNO can throw an interrupt for all digital pins,
- * but those interrupts are for the entire port. (PCINT0, PCINT1 and PCINT2)
- * The only pins that have its own interrupts are pin 2 and 3 (INT0 and INT1)
- */
-int8_t digitalPinToInterrupt(uint8_t pin);
+    /**
+     * @brief Converts a digital pin to the interrupt index used by attachInterrupt and detachInterrupt
+     * @param pin The pin to enable the interrupt. (Accepted pins are 2 and 3)
+     * @return The interrupt index used by attachInterrupt and detachInterrupt.
+     * If pin is not a valid value INVALID_PIN_INTERRUPT is returned instead
+     *
+     * @note Technically Arduino UNO can throw an interrupt for all digital pins,
+     * but those interrupts are for the entire port. (PCINT0, PCINT1 and PCINT2)
+     * The only pins that have its own interrupts are pin 2 and 3 (INT0 and INT1)
+     */
+    int8_t digitalPinToInterrupt(uint8_t pin);
 
-/**
- * @brief Use this function to configure interrupts for pins 2 and 3
- * @param interrupt Interrupt index to configure.
- * Use digitalPinToInterrupt to convert the pin to its corresponding index
- * @param function The function to execute when the interrupt is executed
- * @param mode When the interrupt request should be made
- */
-void attachInterrupt(int8_t interrupt, voidFunctionP function, external_interrupt_mode mode);
+    /**
+     * @brief Use this function to configure interrupts for pins 2 and 3
+     * @param interrupt Interrupt index to configure.
+     * Use digitalPinToInterrupt to convert the pin to its corresponding index
+     * @param function The function to execute when the interrupt is executed
+     * @param mode When the interrupt request should be made
+     */
+    void attachInterrupt(int8_t interrupt, voidFunctionP function, external_interrupt_mode mode);
 
-/**
- * @brief Use this function to turn off an interrupt.
- * @param interrupt Interrupt index to configure.
- * Use digitalPinToInterrupt to convert the pin to its corresponding index
- */
-void detachInterrupt(int8_t interrupt);
+    /**
+     * @brief Use this function to turn off an interrupt.
+     * @param interrupt Interrupt index to configure.
+     * Use digitalPinToInterrupt to convert the pin to its corresponding index
+     */
+    void detachInterrupt(int8_t interrupt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
