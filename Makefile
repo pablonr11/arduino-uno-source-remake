@@ -25,7 +25,7 @@ CFLAGS	= -mmcu=$(MCU) -std=c99 -Wall -Wextra -Os -DF_CPU=$(F_CPU)
 CFLAGS	+= -I$(INC_DIR)
 
 CPPFLAGS = -mmcu=$(MCU) -Wall -Wextra -Os -DF_CPU=$(F_CPU)
-CPPFLAGS += -I$(INC_DIR)
+CPPFLAGS += -I$(INC_DIR) -I$(CLASS_DIR)
 
 LDFLAGS = -mmcu=$(MCU)
 
