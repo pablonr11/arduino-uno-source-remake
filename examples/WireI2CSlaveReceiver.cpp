@@ -5,6 +5,9 @@
 
 #include <stdint.h>
 
+// This example does the same as i2cSlaveReceiver example
+// but it is implemented using the Wire class
+
 #define I2C_SLAVE_ADDR 0x55 // Own i2c address
 
 #define I2C_RX_BUFFER_SIZE (I2C_BUFFER_SIZE + 1)
