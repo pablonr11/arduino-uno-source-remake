@@ -9,6 +9,9 @@
 #include <string.h>
 #include <stdint.h>
 
+// This example does the same as i2cMaster example
+// but it is implemented using the Wire class
+
 // If RTC is already configured just comment this line
 // and upload the program again.
 // This avoids configuring the RTC everytime on start.
