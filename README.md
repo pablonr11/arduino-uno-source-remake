@@ -19,6 +19,7 @@ This is a list of features I would like to implement.
 * [X] ADC
 * [X] PWM
 * [X] I2C (Wire)
+* [ ] EEPROM
 * [ ] SPI
 
 *This readme and the project will be updated in a future*
