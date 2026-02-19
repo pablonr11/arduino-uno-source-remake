@@ -369,4 +369,29 @@
 #define I2C_PRESCALER_16 2
 #define I2C_PRESCALER_64 3
 
+// --- EEPROM Registers ---
+#define EEAR REG16(0x41) // EEPROM Address Register
+#define EEARH REG8(0x42)
+#define EEARL REG8(0x41)
+#define EEAR0 0
+#define EEAR1 1
+#define EEAR2 2
+#define EEAR3 3
+#define EEAR4 4
+#define EEAR5 5
+#define EEAR6 6
+#define EEAR7 7
+#define EEAR8 8
+#define EEAR9 9
+
+#define EEDR REG8(0x40) // EEPROM Data Register
+
+#define EECR REG8(0x3F) // EEPROM Control Register
+#define EERE 0
+#define EEPE 1
+#define EEMPE 2
+#define EERIE 3
+#define EEPM0 4
+#define EEPM1 5
+
 #endif
