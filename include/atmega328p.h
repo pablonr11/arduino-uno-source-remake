@@ -3,13 +3,6 @@
 
 #include "utils.h"
 
-// By default the Arduino UNO runs at 16MHz.
-// It could run at another frequency if it is configured that way.
-// In that case this define need to be changed or overwritten.
-#ifndef F_CPU
-#define F_CPU 16000000
-#endif
-
 // Status register
 #define SREG REG8(0x5F)
 #define SREG_C 0
