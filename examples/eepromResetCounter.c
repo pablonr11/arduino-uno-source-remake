@@ -1,6 +1,6 @@
 #include "timing.h"
 #include "serial.h"
-#include "eeprom.h"
+#include "EEPROMClass.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -46,13 +46,9 @@ uint16_t countReset()
 {
     uint16_t counter;
 
-    counter = eeprom_read_byte(0);
-    counter |= ((uint16_t)eeprom_read_byte(1)) << 8;
-
+    counter = EEPROM.get(0, counter);
     counter++;
-
-    eeprom_write_byte(0, (uint8_t)(counter & 0xFF));
-    eeprom_write_byte(1, (uint8_t)((counter >> 8) & 0xFF));
+    EEPROM.put(0, counter);
 
     return counter;
 }
